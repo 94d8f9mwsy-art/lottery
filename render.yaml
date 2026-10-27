@@ -1,0 +1,25 @@
+services:
+  # 抽签网站本体
+  - type: web
+    name: lottery-draw
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: lottery-store
+          property: connectionString
+      # 创建时会让你填一个 ADMIN_PASSWORD，填你自己记得的管理员密码即可。
+      # 这个密码只存在服务器上，网页里谁都看不到；忘了就在 Render 里改这里再重新部署。
+      - key: ADMIN_PASSWORD
+        sync: false
+
+  # 免费 Redis，用来存抽签数据，保证服务休眠重启后数据还在
+  - type: keyvalue
+    name: lottery-store
+    plan: free
+    ipAllowList: []
